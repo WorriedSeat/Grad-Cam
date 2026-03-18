@@ -1,4 +1,7 @@
-import tqdm
+from __future__ import annotations
+import sys
+from pathlib import Path
+from tqdm.auto import tqdm
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,7 +9,11 @@ import torch.optim as optim
 from torchvision import models, transforms
 from sklearn.utils.class_weight import compute_class_weight
 
-from src.dataset.dataset import _load_config, get_data_splits, FERDataset
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.dataset.dataset import _load_config, get_data_splits, FERDataset, make_dataloader
 
 DATA_TRANSFORMS = {
     "train":transforms.Compose([
@@ -48,7 +55,7 @@ def train(model, epochs:int, max_patience:int, device,
             optimizer.step()
             running_loss += loss.item() * inputs.size(0)
 
-        train_loss = running_loss / len(train_loader)
+        train_loss = running_loss / max(1, len(train_loader.dataset))
 
         model.eval()
         correct, total, val_loss = 0, 0, 0.0
@@ -63,7 +70,7 @@ def train(model, epochs:int, max_patience:int, device,
                 correct += (pred == labels).sum().item()
 
         val_acc = correct / total
-        val_loss /=len(val_loader)
+        val_loss /= max(1, len(val_loader.dataset))
 
         print(f"Epoch {epoch+1:3d}/{epochs} | Train Loss: {train_loss:.4f} | "
             f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f} | LR: {optimizer.param_groups[0]['lr']:.6f}")
@@ -97,9 +104,9 @@ def efficientnet_train():
     val_dataset   = FERDataset(val_df,   DATA_TRANSFORMS.get("val"))
     test_dataset  = FERDataset(test_df,  DATA_TRANSFORMS.get("val"))
 
-    train_loader = FERDataset.dataloader(train_dataset, BATCH_SIZE, shuffle=True)
-    val_loader = FERDataset.dataloader(val_dataset, BATCH_SIZE, shuffle=False)
-    test_loader = FERDataset.dataloader(test_dataset, BATCH_SIZE, shuffle=False)
+    train_loader = make_dataloader(train_dataset, BATCH_SIZE, shuffle=True)
+    val_loader = make_dataloader(val_dataset, BATCH_SIZE, shuffle=False)
+    test_loader = make_dataloader(test_dataset, BATCH_SIZE, shuffle=False)
 
     model = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.IMAGENET1K_V1)
     model.classifier[1] = nn.Linear(model.classifier[1].in_features, 7)

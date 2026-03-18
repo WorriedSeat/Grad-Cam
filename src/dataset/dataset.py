@@ -1,20 +1,27 @@
-import os, yaml
-import torch
+import yaml
+from pathlib import Path
 import numpy as np
 import pandas as pd
-from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
 def _load_config():
-    if os.path.exists("config/config.yaml"):
-        with open("config/config.yaml", "r") as f:
-            return yaml.safe_load(f)
-    else:
-        raise FileNotFoundError("ERROR: config not found at config/config.yaml .\nEnsure you running from project's root directory")
+    repo_root = Path(__file__).resolve().parents[2]
+    config_path = repo_root / "config" / "config.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(
+            f"ERROR: config not found at {config_path}.\n"
+            f"Ensure the file exists and the project structure is intact."
+        )
+    with config_path.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 def get_data_splits():
     config = _load_config()
-    data = pd.read_csv(config["paths"]["data"])
+    repo_root = Path(__file__).resolve().parents[2]
+    data_path = Path(config["paths"]["data"])
+    if not data_path.is_absolute():
+        data_path = repo_root / data_path
+    data = pd.read_csv(data_path)
     
     train_df = data[data['Usage'] == 'Training'].reset_index(drop=True)
     val_df   = data[data['Usage'] == 'PublicTest'].reset_index(drop=True)
@@ -49,10 +56,14 @@ class FERDataset(Dataset):
             img = self.transform(img)
         return img, label
 
-    @classmethod
-    def dataloader(cls, batch_size:int, shuffle:bool):
-        if batch_size <= 0:
-            raise ValueError("batch_size must be positive")
-        
-        return DataLoader(cls, batch_size=batch_size, shuffle=shuffle, num_workers=4, pin_memory=True)
-    
+def make_dataloader(dataset: Dataset, batch_size: int, shuffle: bool):
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True,
+    )

@@ -1,5 +1,5 @@
 paths:
-  data: "data/fer_2013.csv"
+  data: "data/fer2013.csv"
 
 models:
   efficientnet: "models/best_efficientnet.pth"
