@@ -1,31 +1,45 @@
 import torch
 import torch.nn.functional as F
+
 import numpy as np
 
 
-def compute_gradcam(model, input_tensor, target_class, target_layer_name="features.8"):
-    """
-    Grad-CAM для EfficientNet-B4 (и других моделей torchvision).
+def _default_target_layer(model):
+    """Return default target layer name based on model type."""
+    name = type(model).__name__
+    if name == "ResEmoteNet":
+        return "res_blocks.2"
+    return "features.8"
 
-    Рекомендуемые слои для EfficientNet-B4:
-      - "features.8"   ← финальный Conv перед GAP (лучший выбор, 1792 карты, 7×7)
-      - "features.7"   ← последняя MBConv-стадия (448 карты, 7×7)
+
+def compute_gradcam(model, input_tensor, target_class, target_layer_name=None):
+    """
+    Grad-CAM для EfficientNet-B4 и ResEmoteNet.
+
+    EfficientNet-B4: "features.8" (финальный Conv перед GAP)
+    ResEmoteNet: "res_blocks.2" (последний Residual block перед AAP)
 
     Args:
         model:             обученная модель в режиме eval
         input_tensor:      тензор [1, C, H, W], БЕЗ requires_grad
         target_class:      индекс целевого класса
-        target_layer_name: имя слоя для визуализации
+        target_layer_name: имя слоя для визуализации (auto-detect если None)
 
     Returns:
         cam: тензор [H, W] со значениями 0..1
     """
+    if target_layer_name is None:
+        target_layer_name = _default_target_layer(model)
+
     named_modules = dict(model.named_modules())
     if target_layer_name not in named_modules:
-        available = [k for k in named_modules if k.startswith("features")]
+        available = [
+            k for k in named_modules
+            if "conv" in k or "features" in k or "res_blocks" in k
+        ][:20]
         raise ValueError(
             f"Layer '{target_layer_name}' not found!\n"
-            f"Available layers: {available}"
+            f"Available layers (sample): {available}"
         )
 
     target_layer = named_modules[target_layer_name]

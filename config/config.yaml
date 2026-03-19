@@ -1,5 +1,7 @@
 paths:
   data: "data/fer2013.csv"
 
+
 models:
   efficientnet: "models/best_efficientnet.pth"
+  resemotenet: "models/best_resemotenet (3).pth"
