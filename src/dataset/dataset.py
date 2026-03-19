@@ -15,6 +15,7 @@ def _load_config():
     with config_path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
+
 def get_data_splits():
     """Legacy: FER2013 splits. Use get_rafdb_splits() for RAF-DB."""
     config = _load_config()

@@ -11,6 +11,7 @@ import torch.nn as nn
 class SEBlock(nn.Module):
     """Squeeze-and-Excitation block."""
 
+
     def __init__(self, channels: int, reduction: int = 16):
         super().__init__()
         self.pool = nn.AdaptiveAvgPool2d(1)

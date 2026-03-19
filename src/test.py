@@ -16,6 +16,7 @@ from src.gradcam.grad_cam import compute_gradcam
 from src.models.resemotenet import ResEmoteNet
 from src.dataset.dataset import _load_config
 
+
 # ── Устройство ──────────────────────────────────────────────────────────────
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Используется устройство: {device}")
