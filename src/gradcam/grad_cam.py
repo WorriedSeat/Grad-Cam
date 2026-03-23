@@ -9,9 +9,8 @@ class GradCAM:
         self.gradients = None
         self.activations = None
         
-        # Hooks
-        self.forward_hook = target_layer.register_forward_hook(self.save_activation)
-        self.backward_hook = target_layer.register_full_backward_hook(self.save_gradient)
+        self.forward_hook = None
+        self.backward_hook = None        
 
     def save_activation(self, module, input, output):
         self.activations = output.detach()
@@ -20,6 +19,11 @@ class GradCAM:
         self.gradients = grad_output[0].detach()
 
     def __call__(self, input_tensor: torch.Tensor, target_class: int = None) -> np.ndarray:
+        # Hooks
+        self.forward_hook = self.target_layer.register_forward_hook(self.save_activation)
+        self.backward_hook = self.target_layer.register_full_backward_hook(self.save_gradient)
+        
+        
         self.model.zero_grad()
         
         # Forward pass
@@ -53,6 +57,10 @@ class GradCAM:
         
         return cam.cpu().numpy()
 
+    def remove_grad_activ(self):
+        self.gradients = None
+        self.activations = None
+    
     def remove_hooks(self):
         self.forward_hook.remove()
         self.backward_hook.remove()
