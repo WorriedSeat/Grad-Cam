@@ -5,11 +5,12 @@ import numpy as np
 
 
 def _default_target_layer(model):
-    """Return default target layer name based on model type."""
     name = type(model).__name__
+    if name == "EfficientEmotionNet":
+        return "model.features.8"   # ← новый
     if name == "ResEmoteNet":
-        return "res_blocks.2"
-    return "features.8"
+        return "conv3.0"
+    return "model.features.8"
 
 
 def compute_gradcam(model, input_tensor, target_class, target_layer_name=None):

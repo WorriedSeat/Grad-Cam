@@ -1,6 +1,3 @@
-"""
-Train ResEmoteNet on RAF-DB (Hugging Face).
-"""
 from __future__ import annotations
 
 import sys
@@ -10,7 +7,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
 from torchvision import transforms
 from tqdm.auto import tqdm
 from sklearn.utils.class_weight import compute_class_weight
