@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
 from torchvision import transforms
 from tqdm.auto import tqdm
 from sklearn.utils.class_weight import compute_class_weight
