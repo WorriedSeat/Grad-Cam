@@ -1,16 +1,9 @@
-"""
-ResEmoteNet: CNN + SE + Residual architecture for facial emotion recognition.
-Based on arXiv:2409.10545
-"""
 from __future__ import annotations
-
 import torch
 import torch.nn as nn
 
-
 class SEBlock(nn.Module):
     """Squeeze-and-Excitation block."""
-
 
     def __init__(self, channels: int, reduction: int = 16):
         super().__init__()

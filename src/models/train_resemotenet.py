@@ -1,8 +1,4 @@
-"""
-Train ResEmoteNet on RAF-DB (Hugging Face).
-"""
 from __future__ import annotations
-
 import sys
 from pathlib import Path
 
@@ -168,7 +164,6 @@ def resemotenet_train():
         scheduler,
         save_path,
     )
-
 
 if __name__ == "__main__":
     resemotenet_train()
