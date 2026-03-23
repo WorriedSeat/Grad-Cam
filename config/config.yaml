@@ -3,4 +3,4 @@ paths:
 
 models:
   efficientnet: "models/best_efficientnet_emotion.pth"
-  resemotenet: "models/best_resemotenet (3).pth"
+  resemotenet: "models/best_resemotenet.pth"
