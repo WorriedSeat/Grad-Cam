@@ -15,7 +15,6 @@ def _load_config():
     with config_path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
-
 def get_data_splits():
     """Legacy: FER2013 splits. Use get_rafdb_splits() for RAF-DB."""
     config = _load_config()
@@ -30,7 +29,6 @@ def get_data_splits():
     test_df  = data[data['Usage'] == 'PrivateTest'].reset_index(drop=True)
     
     return train_df, val_df, test_df
-
 
 def get_rafdb_splits(val_ratio: float = 0.1, seed: int = 42):
     """
@@ -59,7 +57,6 @@ def get_rafdb_splits(val_ratio: float = 0.1, seed: int = 42):
         return train_hf, val_hf, test_hf
     else:
         raise ValueError(f"Unexpected RAF-DB splits: {splits}")
-
 
 class RAFDBDataset(Dataset):
     """
