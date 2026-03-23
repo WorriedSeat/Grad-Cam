@@ -209,3 +209,4 @@ __marimo__/
 data/*csv
 models/*.pth
 .vscode
+models/*.t7
