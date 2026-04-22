@@ -4,7 +4,7 @@ Deep CNNs routinely reach 80–85% accuracy on seven-class facial emotion recogn
 
 **Grad-CAM** — a post-hoc explanation method that turns a trained CNN into a heatmap generator. We implement it from scratch on top of an EfficientNet-B0 fine-tuned on RAF-DB, and use it to probe what the network actually attends to when it predicts each emotion.
 
-We also show: a landmark-aware scoring pipeline that turns the qualitative heatmap into three numerical metrics. It is supplementary — the core of the project is Grad-CAM itself.
+We also show: a landmark-aware scoring pipeline that turns the qualitative heatmap into three numerical metrics.
 
 ## Demystifying Decisions with Post-hoc Explanations
 
@@ -223,7 +223,7 @@ python src/evaluation/run_eval.py
 
 ---
 
-# Supplementary: Quantifying Grad-CAM Quality
+# Quantifying Grad-CAM Quality
 
 ## The Challenge of Validating Explanations
 
