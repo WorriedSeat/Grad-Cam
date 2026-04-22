@@ -38,7 +38,7 @@ CFG = {
 
 EMOTION_LABELS = {
     0: "Anger", 1: "Disgust", 2: "Fear",
-    3: "Happy", 4: "Sad",    5: "Surprise", 6: "Neutral",
+    3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprise",
 }
 
 

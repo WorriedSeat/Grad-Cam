@@ -1,0 +1,14 @@
+torch
+torchvision
+datasets
+huggingface_hub
+scikit-learn
+tqdm
+pyyaml
+numpy<2
+pandas
+matplotlib
+Pillow
+mediapipe
+scipy
+opencv-python
