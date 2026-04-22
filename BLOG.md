@@ -1,12 +1,12 @@
 # Introduction: Unveiling the Black Box of Facial Emotion Recognition
 
-Deep CNNs routinely reach 80–85% accuracy on seven-class facial emotion recognition. Accuracy alone, however, tells us nothing about **where on the face** the model looks. For a fine-grained task where emotions differ only in subtle anatomical cues, this matters: a model can be accurate on a test set while relying on spurious background correlations.
+Deep CNNs routinely reach 80–85% accuracy on seven-class facial emotion recognition. Accuracy alone, however, tells us nothing about **where on the face** the model looks. For a fine-grained task where emotions differ only in subtle anatomical cues, this matters: a model can be accurate on a test set while relying on fake background correlations.
 
 **Grad-CAM** — a post-hoc explanation method that turns a trained CNN into a heatmap generator. We implement it from scratch on top of an EfficientNet-B0 fine-tuned on RAF-DB, and use it to probe what the network actually attends to when it predicts each emotion.
 
 We also show: a landmark-aware scoring pipeline that turns the qualitative heatmap into three numerical metrics.
 
-## Demystifying Decisions with Post-hoc Explanations
+## Understanding Decisions with Post-hoc Explanations
 
 Post-hoc explanation methods are techniques used to interpret and explain the decisions made by a model **after** it has been trained. For convolutional models on images, the most common output is a **heatmap** over the input: high values correspond to regions that took an important role in the network's decision.
 
@@ -14,7 +14,7 @@ Representative methods include **CAM**, **Grad-CAM**, and **FullGrad**. We focus
 
 ## Fine-Grained Classification: A Case for Explainability
 
-Facial emotion recognition is a fine-grained task: the seven basic emotions share most of the image and differ only in small, anatomically-local cues. This property is both a risk (the model can learn shortcuts in the shared regions) and an opportunity.
+Facial emotion recognition is a fine-grained task: the seven basic emotions share most of the image and differ only in small, local cues. This property is both a risk (the model can learn shortcuts in the shared regions) and an opportunity.
 
 ---
 
@@ -71,7 +71,8 @@ Grad-Cam/
     │   └── train_efficientnet.py            # training loop
     ├── gradcam/grad_cam.py                  # Grad-CAM class (main component)
     ├── test.py                              # single-image Grad-CAM demo
-    └── evaluation/                          # optional add-on (see §Supplementary)
+    ├── main.ipynb                           # demo with more examples and single-image testing 
+    └── evaluation/                          # Evaluation
         ├── landmarks.py
         ├── au_masks.py
         ├── metrics.py
@@ -80,10 +81,10 @@ Grad-Cam/
 
 ## Data Loading
 
-We load RAF-DB from [deanngkl/raf-db-7emotions](https://huggingface.co/datasets/deanngkl/raf-db-7emotions). Labels follow HuggingFace's alphabetical `ClassLabel` order — `['anger', 'disgust', 'fear', 'happiness', 'neutral', 'sadness', 'surprise']`.
+We load RAF-DB from [deanngkl/raf-db-7emotions](https://huggingface.co/datasets/deanngkl/raf-db-7emotions). Labels follow this order — `['anger', 'disgust', 'fear', 'happiness', 'neutral', 'sadness', 'surprise']`.
 
 ```python
-# src/dataset/dataset.py (excerpt)
+# src/dataset/dataset.py
 class RAFDBDataset(Dataset):
     def __init__(self, hf_split, transform=None):
         self.hf_split = hf_split
@@ -100,6 +101,7 @@ class RAFDBDataset(Dataset):
         if self.transform:
             img = self.transform(img)
         return img, label
+    ...
 ```
 
 ## Model
@@ -140,7 +142,7 @@ class GradCAM:
         self.target_layer = target_layer
         self.gradients = None
         self.activations = None
-        self.forward_hook  = target_layer.register_forward_hook(self._save_activation)
+        self.forward_hook = target_layer.register_forward_hook(self._save_activation)
         self.backward_hook = target_layer.register_full_backward_hook(self._save_gradient)
 
     def _save_activation(self, module, input, output):
@@ -149,7 +151,7 @@ class GradCAM:
     def _save_gradient(self, module, grad_input, grad_output):
         self.gradients = grad_output[0].detach()
 
-    def __call__(self, input_tensor, target_class=None):
+    def __call__(self, input_tensor: torch.Tensor, target_class: int = None) -> np.ndarray:
         self.model.zero_grad()
         output = self.model(input_tensor)
         if target_class is None:
@@ -158,14 +160,20 @@ class GradCAM:
         one_hot = torch.zeros_like(output)
         one_hot[:, target_class] = 1.0
         output.backward(gradient=one_hot, retain_graph=True)
+        gradients = self.gradients
+        activations = self.activations
 
-        weights = torch.mean(self.gradients, dim=(2, 3), keepdim=True)
-        cam = torch.sum(weights * self.activations, dim=1).squeeze(0)
+        weights = torch.mean(gradients, dim=(2, 3), keepdim=True)
+        cam = torch.sum(weights * activations, dim=1).squeeze(0)
 
         cam = torch.relu(cam)
         cam = cam - torch.min(cam)
         cam = cam / (torch.max(cam) + 1e-8)
         return cam.cpu().numpy()
+
+    def remove_grad_activ(self):
+        self.gradients = None
+        self.activations = None
 
     def remove_hooks(self):
         self.forward_hook.remove()
