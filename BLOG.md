@@ -217,7 +217,7 @@ pip install -r requirements.txt
 # Grad-CAM on one image (the main entry point)
 python src/test.py path/to/face.jpg
 
-# Optional quantitative evaluation (see §Supplementary)
+# Optional quantitative evaluation
 python src/evaluation/run_eval.py
 ```
 
