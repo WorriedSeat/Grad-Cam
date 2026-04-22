@@ -44,6 +44,10 @@ class GradCAM:
 
         return cam.cpu().numpy()
 
+    def remove_grad_activ(self):
+        self.gradients = None
+        self.activations = None
+
     def remove_hooks(self):
         self.forward_hook.remove()
         self.backward_hook.remove()
