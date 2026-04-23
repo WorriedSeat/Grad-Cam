@@ -1,6 +1,2 @@
-paths:
-  data: "data/fer2013.csv"
-
 models:
   efficientnet: "models/best_efficientnet_emotion.pth"
-  resemotenet: "models/best_resemotenet.pth"
